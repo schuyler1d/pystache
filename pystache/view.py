@@ -108,6 +108,9 @@ class View(object):
         else:
             return attr
 
+    def update(self, new_context):
+        return self.__dict__.update(new_context)
+
     def render(self, encoding=None):
         template = self.load_template()
         return Template(template, self).render(encoding=encoding)
