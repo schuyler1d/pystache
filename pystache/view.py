@@ -113,7 +113,7 @@ class View(object):
         # with new context variables and return a new View object
         context = self.context.copy()
         context.update(new_context)
-        return self.__class__(context=new_context)
+        return self.__class__(context=context)
 
     def render(self, encoding=None):
         template = self.load_template()
