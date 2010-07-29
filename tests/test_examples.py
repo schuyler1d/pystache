@@ -12,6 +12,7 @@ from examples.delimiters import Delimiters
 from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
 from examples.nested_context import NestedContext
+from examples.inner_context_bubbling import InnerContextBubbling
 
 class TestView(unittest.TestCase):
     def test_comments(self):
@@ -70,6 +71,8 @@ Again, Welcome!
 
     def test_nested_context(self):
         self.assertEquals(NestedContext().render(), "one and foo and two")
+    def test_inner_context_bubbling(self):
+        self.assertEquals(InnerContextBubbling().render(), "one and foo and two ")
 
 if __name__ == '__main__':
     unittest.main()
