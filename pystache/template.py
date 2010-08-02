@@ -88,7 +88,9 @@ class Template(object):
                     replacer = inner
             elif it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
                 if section[2] != '^':
-                    replacer = self.render(inner, context.update(it))
+                    new_context = context.copy()
+                    new_context.update(it)
+                    replacer = self.render(inner, new_context)
             elif it:
                 insides = []
                 for item in it:

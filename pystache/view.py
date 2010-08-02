@@ -108,12 +108,14 @@ class View(object):
         else:
             return attr
 
-    def update(self, new_context):
-        # Make a copy of current context dict, update its data
-        # with new context variables and return a new View object
+    def copy(self):
+        # Return a new View object with a copied context dict from self
         context = self.context.copy()
-        context.update(new_context)
         return self.__class__(context=context)
+
+    def update(self, new_context):
+        # Update context's data with new context variables
+        self.context.update(new_context)
 
     def render(self, encoding=None):
         template = self.load_template()
