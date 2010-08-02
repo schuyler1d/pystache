@@ -79,7 +79,7 @@ class TestPystache(unittest.TestCase):
 </ul>
 """)
 
-    def test_inner_context_not_propagate_variables(self):
+    def test_inner_context_not_propagates_variables(self):
         template = "{{#foo}}{{thing1}} and {{thing2}} and {{outer_thing}}{{/foo}}{{^foo}}Not foo!{{/foo}} {{thing2}}"
         context = {'outer_thing': 'two', 'foo': {'thing1': 'one', 'thing2': 'foo'}}
 
@@ -89,7 +89,7 @@ class TestPystache(unittest.TestCase):
             def foo(self):
                 return {'thing1': 'one', 'thing2': 'foo'}
 
-        view = InnerContext(template=template, context=context)
+        view = InnerContext(template=template)
         ret = pystache.render(template, context)
         self.assertEquals(ret, "one and foo and two ")
         self.assertEquals(view.render(), "one and foo and two ")
