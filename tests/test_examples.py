@@ -12,7 +12,6 @@ from examples.delimiters import Delimiters
 from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
 from examples.nested_context import NestedContext
-from examples.inner_context_bubbling import InnerContextBubbling
 
 class TestView(unittest.TestCase):
     def test_comments(self):
