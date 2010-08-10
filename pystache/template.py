@@ -94,7 +94,9 @@ class Template(object):
             elif it:
                 insides = []
                 for item in it:
-                    insides.append(self.render(inner, item))
+                    new_context = context.copy()
+                    new_context.update(item)
+                    insides.append(self.render(inner, new_context))
                 replacer = ''.join(insides)
             elif not it and section[2] == '^':
                 replacer = inner
