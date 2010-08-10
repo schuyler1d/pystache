@@ -56,15 +56,16 @@ class TestView(unittest.TestCase):
     def test_complex(self):
         self.assertEquals(ComplexView().render(), """<h1>Colors</h1>
 <ul>
-  <li><strong>red</strong></li>\n    \n    <li><a href="#Green">green</a></li>
-    <li><a href="#Blue">blue</a></li>
+  <li><strong>red</strong></li>
+          <li><a href="#Green">green</a></li>
+      <li><a href="#Blue">blue</a></li>
   </ul>
 """)
 
     def test_higher_order_replace(self):
         view = Lambdas()
         self.assertEquals(view.render(),
-                          'bar != bar. oh, it does!')
+                          'bar != bar. oh, it does!\n')
 
     def test_higher_order_rot13(self):
         view = Lambdas()

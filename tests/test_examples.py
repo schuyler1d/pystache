@@ -21,7 +21,7 @@ class TestView(unittest.TestCase):
     def test_double_section(self):
         self.assertEquals(DoubleSection().render(), """* first
 * second
-* third""")
+* third\n""")
 
     def test_unicode_output(self):
         self.assertEquals(UnicodeOutput().render(), u'<p>Name: Henri Poincaré</p>')

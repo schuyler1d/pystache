@@ -75,7 +75,9 @@ class TestPystache(unittest.TestCase):
         ret = pystache.render(template, context)
         self.assertEquals(ret, """
 <ul>
-  <li>Chris</li><li>Tom</li><li>PJ</li>
+  <li>Chris</li>
+  <li>Tom</li>
+  <li>PJ</li>
 </ul>
 """)
 
@@ -113,13 +115,58 @@ class TestPystache(unittest.TestCase):
         ret = pystache.render(template, context)
         expected = """Say 'hello', everyone:
 
-            eeny says: hello
-            meeny says: hello
-            miney says: hello
-            mo says: hello
+        eeny says: hello
+        meeny says: hello
+        miney says: hello
+        mo says: hello
         """
         self.assertEquals(ret, expected)
 
+    def test_preserve_whitespace(self):
+        template = """<ul>\n    {{#link}}\n        <li><a href="{{url}}">{{text}}</a></li>\n    {{/link}}\n</ul>"""
+        context = {
+            'link': [
+                        {'text': 'github', 'url': 'http://github.com'},
+                        {'text': 'mustache', 'url': 'http://mustache.github.com'},
+                        {'text': 'cheat sheets', 'url': 'http://cheat.errtheblog.com'},
+            ]
+        }
+        expected = """<ul>\n    <li><a href="http://github.com">github</a></li>
+    <li><a href="http://mustache.github.com">mustache</a></li>
+    <li><a href="http://cheat.errtheblog.com">cheat sheets</a></li>\n</ul>""".strip()
+        ret = pystache.render(template, context)
+        self.assertEquals(ret, expected)
+
+    def test_preserve_whitespace_nested_contexts(self):
+        template = """
+{{#blogroll}}
+    {{#list}}
+        <ul>
+            {{#link}}
+                    <li><a href="{{url}}">{{text}}</a></li>
+            {{/link}}
+        </ul>
+    {{/list}}
+{{/blogroll}}
+""".strip()
+        context = {
+            'blogroll': {
+                'list': {
+                    'link': [
+                                {'text': 'github', 'url': 'http://github.com'},
+                                {'text': 'mustache', 'url': 'http://mustache.github.com'},
+                                {'text': 'cheat sheets', 'url': 'http://cheat.errtheblog.com'},
+                    ]
+                }
+            }
+        }
+        expected = """<ul>
+            <li><a href="http://github.com">github</a></li>
+            <li><a href="http://mustache.github.com">mustache</a></li>
+            <li><a href="http://cheat.errtheblog.com">cheat sheets</a></li>
+        </ul>\n"""
+        ret = pystache.render(template, context)
+        self.assertEquals(ret, expected)
 
 if __name__ == '__main__':
     unittest.main()

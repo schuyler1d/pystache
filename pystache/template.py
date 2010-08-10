@@ -63,7 +63,7 @@ class Template(object):
         """Compiles our section and tag regular expressions."""
         tags = { 'otag': re.escape(self.otag), 'ctag': re.escape(self.ctag) }
 
-        section = r"%(otag)s[\#|^]([^\}]*)%(ctag)s\s*(.+?)\s*%(otag)s/\1%(ctag)s"
+        section = r"(\n?)([ \t]*)%(otag)s([\#|^])([^\}]*)%(ctag)s\s*(.+?)[ \t]*%(otag)s/\4%(ctag)s([ \t]*)(\n?)"
         self.section_re = re.compile(section % tags, re.M|re.S)
 
         tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+"
@@ -76,21 +76,36 @@ class Template(object):
             if match is None:
                 break
 
-            section, section_name, inner = match.group(0, 1, 2)
+            section, newline, indent, section_type, section_name, inner, \
+                trailing_space, trailing_nl = match.group(0, 1, 2, 3, 4, 5, 6, 7)
             section_name = section_name.strip()
 
+            join = lambda *args, **kwargs: \
+                    kwargs.get('delimiter', '').join([arg for arg in args])
+
+            if trailing_nl:
+                trailing_space = ''
+            if inner.endswith("\n"):
+                trailing_nl = ''
+
+            inner = join(indent, inner, trailing_space, trailing_nl)
             it = get_or_attr(context, section_name, None)
             replacer = ''
+            # Callable section
             if it and isinstance(it, collections.Callable):
                 replacer = it(inner)
+            # Inverted section with a non-false value
+            elif it and section_type == '^':
+                replacer = join(trailing_space, trailing_nl)
+            # Pure-text section
             elif it and not hasattr(it, '__iter__'):
-                if section[2] != '^':
-                    replacer = inner
+                replacer = inner
+            # Section with context
             elif it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
-                if section[2] != '^':
-                    new_context = context.copy()
-                    new_context.update(it)
-                    replacer = self.render(inner, new_context)
+                new_context = context.copy()
+                new_context.update(it)
+                replacer = self.render(inner, new_context)
+            # Looping section
             elif it:
                 insides = []
                 for item in it:
@@ -98,10 +113,14 @@ class Template(object):
                     new_context.update(item)
                     insides.append(self.render(inner, new_context))
                 replacer = ''.join(insides)
-            elif not it and section[2] == '^':
+            # Inverted section
+            elif not it and section_type == '^':
                 replacer = inner
+            # Section with false value
+            else:
+                replacer = join(indent, trailing_space, trailing_nl)
 
-            template = template.replace(section, replacer)
+            template = template.replace(section, join(newline, replacer))
 
         return template
 
