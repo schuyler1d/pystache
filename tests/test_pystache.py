@@ -94,5 +94,32 @@ class TestPystache(unittest.TestCase):
         self.assertEquals(ret, "one and foo and two ")
         self.assertEquals(view.render(), "one and foo and two ")
 
+    def test_inner_context_looping(self):
+        template = """Say '{{greeting}}', everyone:
+
+        {{#list}}
+          {{name}} says: {{greeting}}
+        {{/list}}
+        """
+        context = {
+        "greeting": "hello",
+        "list": [
+                    {"name": "eeny"},
+                    {"name": "meeny"},
+                    {"name": "miney"},
+                    {"name": "mo"}
+                ]
+        }
+        ret = pystache.render(template, context)
+        expected = """Say 'hello', everyone:
+
+            eeny says: hello
+            meeny says: hello
+            miney says: hello
+            mo says: hello
+        """
+        self.assertEquals(ret, expected)
+
+
 if __name__ == '__main__':
     unittest.main()
