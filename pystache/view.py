@@ -100,13 +100,18 @@ class View(object):
             raise KeyError("No such key.")
         return val
 
-    def get(self, attr, default):
-        attr = self.context.get(attr, getattr(self, attr, default))
+    def get(self, attr, default=None):
+        attribute = self.context.get(attr, None)
 
-        if hasattr(attr, '__call__'):
-            return attr()
-        else:
-            return attr
+        # `attribute` is compared to None instead of simply evaluating
+        # its trueness in order to prevent keys which have a false value
+        # - e.g. zero - to be ignored.
+        if attribute is None:
+            attribute = getattr(self, attr, default)
+            if hasattr(attribute, '__call__'):
+                return attribute()
+
+        return attribute
 
     def render(self, encoding=None):
         template = self.load_template()
