@@ -2,6 +2,7 @@
 
 import unittest
 import pystache
+from pystache.view import View
 
 class TestPystache(unittest.TestCase):
     def test_basic(self):
@@ -78,6 +79,17 @@ class TestPystache(unittest.TestCase):
   <li>Chris</li><li>Tom</li><li>PJ</li>
 </ul>
 """)
+
+    def test_view_callable_bug(self):
+        template = "** {{title}}\n\n  {{#icecream}}Strawberry{{/icecream}}"
+        class Dummy(View):
+            pass
+        context = {'icecream': lambda flavor: "%s icecream" % flavor, 'title': 'Yummy'}
+        expected = "** Yummy\n\n  Strawberry icecream"
+        dummy = Dummy(template, context)
+        ret = dummy.render()
+        self.assertEquals(ret, expected)
+
 
 if __name__ == '__main__':
     unittest.main()
