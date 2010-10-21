@@ -18,16 +18,32 @@ def modifier(symbol):
     return set_modifier
 
 
+def get_or_attr_dot_separator(obj, name, default=None):
+    refs = name.split('.')
+    if len(refs)==1:
+        return get_or_attr(obj,name,default)
+    else:
+        for ref in refs:
+            obj = get_or_attr(obj,ref)
+            if obj is None:
+                return default
+        return obj
+
+_get_tries = [
+    (lambda o,n:o[n], KeyError),
+    (lambda o,n:o[int(n)], (IndexError,ValueError,) ),
+    (lambda o,n:getattr(o,n), AttributeError),
+]
+
 def get_or_attr(obj, name, default=None):
-    try:
-        return obj[name]
-    except KeyError:
-        return default
-    except:
+    for _try in _get_tries:
         try:
-            return getattr(obj, name)
-        except AttributeError:
+            return _try[0](obj,name)
+        except _try[1]:
             return default
+        except:
+            continue
+    return default
 
 
 class Template(object):
@@ -47,6 +63,9 @@ class Template(object):
         self.template = template
         self.context = context or {}
         self.compile_regexps()
+        self.get_sub = get_or_attr
+        if getattr(context,'template_dots',False):
+            self.get_sub = get_or_attr_dot_separator
 
     def render(self, template=None, context=None, encoding=None):
         """Turns a Mustache template into something wonderful."""
@@ -89,7 +108,7 @@ class Template(object):
                 trailing_nl = ''
 
             inner = join(indent, inner, trailing_space, trailing_nl)
-            it = get_or_attr(context, section_name, None)
+            it = self.get_sub(context, section_name, None)
             replacer = ''
             # Callable section
             if it and isinstance(it, collections.Callable):
@@ -142,7 +161,7 @@ class Template(object):
     @modifier(None)
     def render_tag(self, tag_name, context):
         """Given a tag name and context, finds, escapes, and renders the tag."""
-        raw = get_or_attr(context, tag_name, '')
+        raw = self.get_sub(context, tag_name, '')
         if not raw and raw is not 0:
             return ''
         return cgi.escape(unicode(raw))
@@ -156,7 +175,7 @@ class Template(object):
     @modifier('&')
     def render_unescaped(self, tag_name=None, context=None):
         """Render a tag without escaping it."""
-        return unicode(get_or_attr(context, tag_name, ''))
+        return unicode(self.get_sub(context, tag_name, ''))
 
     @modifier('>')
     def render_partial(self, tag_name=None, context=None):

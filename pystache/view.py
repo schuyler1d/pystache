@@ -24,6 +24,8 @@ class View(object):
     # do any decoding of the template.
     template_encoding = None
 
+    template_dots = False
+
     def __init__(self, template=None, context=None, **kwargs):
         self.template = template
         self.context = context or {}

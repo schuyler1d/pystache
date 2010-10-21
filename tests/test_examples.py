@@ -12,6 +12,7 @@ from examples.delimiters import Delimiters
 from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
 from examples.nested_context import NestedContext
+from examples.dots import Dots
 
 class TestView(unittest.TestCase):
     def test_comments(self):
@@ -70,6 +71,9 @@ Again, Welcome!
 
     def test_nested_context(self):
         self.assertEquals(NestedContext().render(), "one and foo and two")
+
+    def test_dots(self):
+        self.assertEquals(Dots().render(), "one two three")
 
 if __name__ == '__main__':
     unittest.main()
